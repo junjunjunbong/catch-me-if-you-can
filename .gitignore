@@ -1,8 +1,5 @@
-# Generated role data — per-project, per-user, regenerated via /catch-me
-.claude/catch-me/
-
-# Local Claude Code settings (harness-level, not part of the tool)
-.claude/settings.local.json
+# Harness-level local state (not part of the plugin)
+.claude/
 
 # macOS
 .DS_Store

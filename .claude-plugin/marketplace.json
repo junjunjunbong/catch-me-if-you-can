@@ -1,0 +1,13 @@
+{
+  "name": "junjunjunbong",
+  "owner": {
+    "name": "junjunjunbong"
+  },
+  "plugins": [
+    {
+      "name": "catch-me-if-you-can",
+      "source": "./",
+      "description": "Crash-course any profession in one turn — generates persona, lexicon, signaling, anti-patterns, first-week plan, and a project-tailored playbook."
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 # catch-me-if-you-can
 
-A project-local Claude Code tool that crash-courses you on any profession, so you can (a) direct Claude better within that domain and (b) know what a real practitioner would actually do on Monday morning. Inspired by the Spielberg film — con artist's crash course, not a textbook.
+A Claude Code plugin that crash-courses you on any profession, so you can (a) direct Claude better within that domain and (b) know what a real practitioner would actually do on Monday morning. Inspired by the Spielberg film — con artist's crash course, not a textbook.
 
-Run `/catch-me`, name the role, and get back 6 role artifacts generated and saved under your project:
+Run `/catch-me`, name the role, and get back 6 role artifacts generated and saved in **your current project**:
 
 - `persona.md` — the voice, defaults, opinions a real one holds
 - `lexicon.md` — 40–60 shibboleths with realistic usage and common misuses
@@ -13,37 +13,24 @@ Run `/catch-me`, name the role, and get back 6 role artifacts generated and save
 
 A passive `active-role` skill then quietly folds that domain perspective into the main chat whenever your questions are role-relevant.
 
-## Status
+## Why it's a plugin but still project-local
 
-v1 Phase 1 — project-local, skill-centric. Not a marketplace plugin yet.
+The plugin is installed globally (once), but every role it generates is saved inside the project you run it in, at `.claude/catch-me/`. Different projects get independent personas — `game-dev` in Project A and `data-eng` in Project B never bleed into each other.
 
-Implemented:
-- `/catch-me` — onboarding + artifact generation + activation
-- `active-role` — hidden auto-invoked persona loader
+## Install
 
-Planned:
-- Phase 2: `/catch-switch`, `/catch-list`, `/catch-forget`
-- Phase 3: `/catch-deepen`, `/catch-quiz`, role export, plugin packaging
-- v1.1: optional `UserPromptSubmit` hook if auto-invocation proves unreliable
+In Claude Code:
 
-## Install (project-local)
+```
+/plugin marketplace add junjunjunbong/catch-me-if-you-can
+/plugin install catch-me-if-you-can@junjunjunbong
+```
 
-1. Clone this repo somewhere.
-   ```bash
-   git clone https://github.com/junjunjunbong/catch-me-if-you-can.git
-   ```
-2. Copy the `.claude/` folder into the target project you want to try it on:
-   ```bash
-   cp -R catch-me-if-you-can/.claude /path/to/your/project/
-   ```
-   (or symlink it if you want updates to flow through)
-3. Open that project in Claude Code.
-
-That's it. No install step, no package manager.
+The marketplace name comes from `.claude-plugin/marketplace.json` in this repo; the plugin name from `.claude-plugin/plugin.json`.
 
 ## Use
 
-In your target project, run:
+Open any project in Claude Code and run:
 
 ```
 /catch-me
@@ -55,7 +42,7 @@ Optionally pass a role hint:
 /catch-me game developer — indie Unity 2D
 ```
 
-The onboarder asks up to three short questions (role + flavor, depth, current project context), generates the 6 artifacts + `meta.json`, and saves them to `.claude/catch-me/roles/<slug>/`. It also writes `.claude/catch-me/active-role.json` pointing at the new role.
+The onboarder asks up to three short questions (role + flavor, depth, current project context), generates the 6 artifacts + `meta.json`, and saves them to `.claude/catch-me/roles/<slug>/` **inside the project you're in**. It also writes `.claude/catch-me/active-role.json` pointing at the new role.
 
 After that, any domain-relevant question you ask should come back shaped by the role's persona and playbook — without any explicit "activate persona" step on your part.
 
@@ -64,43 +51,50 @@ Depth levels:
 - **week-one** — survive first week on the job (default)
 - **month-one** — lead a small decision within a month
 
-## Layout
+## Status
+
+v0.1.0 — Phase 1 implemented. Project-local state, plugin packaging.
+
+Implemented:
+- `/catch-me` — onboarding + artifact generation + activation
+- `active-role` — hidden auto-invoked persona loader
+
+Planned:
+- Phase 2: `/catch-switch`, `/catch-list`, `/catch-forget`
+- Phase 3: `/catch-deepen`, `/catch-quiz`, role export
+- v1.1: optional `UserPromptSubmit` hook if auto-invocation proves unreliable
+
+## Plugin layout
 
 ```
-.claude/
+catch-me-if-you-can/
+├── .claude-plugin/
+│   ├── plugin.json
+│   └── marketplace.json
 ├── skills/
-│   ├── catch-me/                 # /catch-me entry (forks to role-onboarder)
-│   │   ├── SKILL.md
+│   ├── catch-me/
+│   │   ├── SKILL.md                            # /catch-me entry (forks → role-onboarder)
 │   │   ├── templates/
-│   │   │   └── role-generation-prompt.md
+│   │   │   └── role-generation-prompt.md       # Quality lever
 │   │   └── scripts/
-│   │       └── write_role_files.sh
-│   └── active-role/              # hidden auto persona loader
-│       └── SKILL.md
+│   │       └── write_role_files.sh             # Atomic artifact writer
+│   └── active-role/
+│       └── SKILL.md                            # Hidden auto persona loader
 ├── agents/
-│   └── role-onboarder.md         # the onboarding + generation subagent
-└── catch-me/                     # project-local state (gitignored by default)
-    ├── active-role.json
-    └── roles/
-        └── <slug>/
-            ├── meta.json
-            ├── persona.md
-            ├── lexicon.md
-            ├── signaling.md
-            ├── anti-patterns.md
-            ├── monday.md
-            └── project-playbook.md
+│   └── role-onboarder.md                       # Onboarding + generation subagent
+├── README.md
+└── LICENSE
 ```
 
-`.claude/catch-me/` is gitignored — generated content is per-project and personal.
+Bundled files are referenced at runtime via `${CLAUDE_PLUGIN_ROOT}`. State writes go to `$(pwd)/.claude/catch-me/` (the user's project).
 
 ## Design principles
 
 - **Con artist, not textbook.** Every sentence teaches a shibboleth, installs an opinion, prevents a tell, or triggers an action. Wikipedia-style overviews get cut.
 - **Specificity is the whole product.** If a sentence would be true for any technical role, it's dead weight.
-- **Passive persona.** `active-role` attaches the lens on relevant turns. No role-play preamble, no CLAUDE.md auto-injection, no hooks.
+- **Passive persona.** `active-role` attaches the lens on relevant turns. No role-play preamble, no CLAUDE.md auto-injection, no SessionStart hooks in v1.
 - **One-level delegation.** `/catch-me` → `role-onboarder` subagent → done. No nested skills or subagent chains.
-- **Project-local state.** Nothing is written outside the project's `.claude/` folder.
+- **Project-local state.** Nothing is written outside the user's project `.claude/` folder, even though the plugin itself is installed globally.
 
 ## License
 
