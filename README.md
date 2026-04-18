@@ -10,6 +10,8 @@ A Claude Code plugin that drops a con-artist's crash course into your project so
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8a63d2.svg)](https://docs.claude.com/en/docs/claude-code)
 [![State](https://img.shields.io/badge/state-project--local-green.svg)](#why-project-local)
 
+**English** | [한국어](README.ko.md)
+
 </div>
 
 ---
