@@ -19,14 +19,23 @@ The plugin is installed globally (once), but every role it generates is saved in
 
 ## Install
 
-In Claude Code:
+Add the marketplace in Claude Code:
 
 ```
 /plugin marketplace add junjunjunbong/catch-me-if-you-can
+```
+
+Install the plugin:
+
+```
 /plugin install catch-me-if-you-can@junjunjunbong
 ```
 
-The marketplace name comes from `.claude-plugin/marketplace.json` in this repo; the plugin name from `.claude-plugin/plugin.json`.
+Reload plugins:
+
+```
+/reload-plugins
+```
 
 ## Use
 
